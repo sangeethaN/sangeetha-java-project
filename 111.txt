@@ -1,0 +1,136 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    <%@ page import="java.sql.PreparedStatement, java.sql.ResultSet, com.stock.util.Database, com.stock.util.Cookies, java.sql.Statement, java.sql.Connection,java.util.List,java.util.LinkedList ,com.stock.dao.*" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Stock Management</title>
+</head>
+<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css" type="text/css" />
+<style type="text/css">
+.center-content{
+width:1000px;
+margin:150px auto;
+}
+</style>
+<body>
+
+
+<nav class="navbar navbar-default center-content">
+ <a class="btn btn-primary col-sm-6-btn-xs" href="discount.jsp" >Applydiscount</a>
+<a class="btn btn-primary col-sm-6-btn-xs" href="search.jsp" >Filterby</a>
+<a class="btn btn-primary col-sm-6-btn-xs" href="addnew.jsp" >Addnew</a>
+<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+</ul>
+</div>
+
+      <form class="navbar-form navbar-right"  method="post" action="search">
+        
+
+  <div class="form-group">
+    <label class="sr-only" for="exampleInputAmount"></label>
+    <div class="input-group">
+     
+      <input type="text" class="form-control" id="search" placeholder="search by name or id">
+      
+    </div>
+  </div>
+  <button type="submit"  class="btn btn-primary" method="post" action="search">search</button><br>
+
+     </form>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<nav class="navbar navbar-default center-content">
+    <form class="navbar-form" role="search">
+      <div class="form-group" >
+          <label for="fields">Sort By Field   </label>
+          
+        <select class="form-control" id="field" name="field">
+          <option value="Identity" >Identity</option>
+          <option value="Name" >Name</option>
+          <option value="MaximumRetailPrice">Maximum Retail Price</option>
+          <option value="QuantityInStock" >Quantity In Stock</option>
+          <option value="Discount">Discount</option>
+        </select>
+        </select>
+      </div>
+      <div class="form-group">
+          <label for="sorting">on either   </label>
+      
+     
+        <select class="form-control" id="sort" name="sort">
+          <option value="Ascending">Ascending</option>
+          <option value="Descending">Descending</option>
+        </select>
+             </select>
+      </div>
+      <button type="submit" class="btn btn-primary" method="post" action="view.jsp">Get View</button>
+    </form>
+</nav>
+<!-- Sort Navigations Ends -->
+<table class="table table-bordered table-hover center-content">
+<tr><th>Identity</th><th>Name of Item</th><th>MRP. in Rs.</th><th>Disc. in %</th><th>Vendor Name</th><th>Qty</th><th>Edit</th><th>Delete</th></tr>
+
+    
+    
+
+    
+<%
+String field=request.getParameter("field");
+String sort=request.getParameter("sort");
+Database db = new Database();
+PreparedStatement ps = db.getPS("select * from stock_management");
+ResultSet rs = ps.executeQuery();
+List<Item> obj=new LinkedList<Item>();
+obj.clear();
+while(rs.next()) {
+  String identity= rs.getString(1);
+  String name= rs.getString(2);
+  int quantityInStock= rs.getInt(3);
+  double mrp=rs.getDouble(4);
+  double discount=rs.getDouble(5);
+  String vendor= rs.getString(6);
+  String mdate= rs.getString(7);
+  String edate= rs.getString(8);
+  
+  obj.add(new Item(identity,name,quantityInStock,mrp,discount,vendor,mdate, edate));
+}
+if(field!=null && sort!=null)
+      if(field.equals("Identity") && sort.equals("Ascending") )
+              obj.sort(new IdentityComparatorAsc());
+      else if( field.equals("Identity") && sort.equals("Descending"))
+              obj.sort(new IdentityComparatorDesc());
+      else if(field.equals("Name")&&sort.equals("Ascending"))
+      obj.sort(new NameComparatorAsc());
+      else if(field.equals("Name")&&sort.equals("Descending"))
+      obj.sort(new NameComparatorDesc());
+      else if(field.equals("MaximumRetailPrice")&&sort.equals("Ascending"))
+      obj.sort(new MrpComparatorAsc());
+      else if(field.equals("MaximumRetailPrice")&&sort.equals("Descending"))
+      obj.sort(new MrpComparatorDesc());
+      else if(field.equals("Discount")&&sort.equals("Ascending"))
+      obj.sort(new DiscountComparatorAsc());
+      else if(field.equals("Discount")&&sort.equals("Descending"))
+      obj.sort(new DiscountComparatorDesc());
+      else if(field.equals("QuantityInStock")&&sort.equals("Ascending"))
+      obj.sort(new QuantityComparatorAsc());
+      else if(field.equals("QuantityInStock")&&sort.equals("Descending"))
+      obj.sort(new QuantityComparatorDesc());
+for(Item each:obj)
+{
+    out.println("<tr><td>"+each.getIdentity()+"</td><td>"+each.getName()+"</td><td>"+each.getQuantity()+"</td><td>"+each.getMrp()+"</td><td>"+each.getDiscount()+"</td><td>"+each.getVendor()+"</td>");
+    out.println("<td> <form action=\"edit.jsp\" method=\"get\" ><input type=\"hidden\" name=\"id\" value="+each.getIdentity() +" /> <input type=\"submit\" value=\"Edit\" class=\"btn btn-info btn-xs\" />");
+    out.println(" </form> </td>");
+    out.println("<td> <form action=\"delete.jsp\" method=\"get\" ><input type=\"hidden\" name=\"id\" value="+each.getIdentity() +" /> <input type=\"submit\" value=\"Delete\" class=\"btn btn-info-danger btn-xs\" />");
+    out.println(" </form> </td></tr>");
+}
+%>
+
+
+    
+</body>
+</html>
