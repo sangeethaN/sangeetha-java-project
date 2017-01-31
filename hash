@@ -1,0 +1,24 @@
+package assignment1;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+
+public class program16 {
+	public static void main(String args[]) throws IOException{
+		BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
+		int i=0,size=0,count=0,length=0;
+		size=Integer.parseInt(bf.readLine());
+		HashMap<String,String> hm=new HashMap<String,String>();
+		String str[]=new String[size];
+		for(i=0;i<size;i++) {
+			str[i]=bf.readLine();
+			length=str[i].length();
+			//System.out.println(str[i].substring(0,1));
+		//	System.out.println(str[i].substring(length-1,length));
+			hm.put(str[i].substring(0,1), str[i].substring(length-1,length));
+		}
+		System.out.println(hm);
+	}
+}
